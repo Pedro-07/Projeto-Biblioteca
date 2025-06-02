@@ -1,0 +1,134 @@
+version: '3.8'
+
+
+networks:
+  rede-biblioteca:
+    driver: bridge
+
+
+volumes:
+  db_alunos_data:
+  db_livros_data:
+  db_emprestimos_data:
+  prometheus_data:
+  grafana_data:
+
+services:
+
+  
+  db_alunos:
+    image: mysql:8
+    container_name: db_alunos
+    environment:
+      MYSQL_DATABASE: db_alunos
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - db_alunos_data:/var/lib/mysql
+    networks:
+      - rede-biblioteca
+
+  db_livros:
+    image: mysql:8
+    container_name: db_livros
+    environment:
+      MYSQL_DATABASE: db_livros
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - db_livros_data:/var/lib/mysql
+    networks:
+      - rede-biblioteca
+
+ 
+  db_emprestimos:
+    image: mysql:8
+    container_name: db_emprestimos
+    environment:
+      MYSQL_DATABASE: db_emprestimos
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - db_emprestimos_data:/var/lib/mysql
+    networks:
+      - rede-biblioteca
+
+  
+  aluno-service:
+    build: ./services/aluno-service
+    container_name: aluno-service
+    depends_on:
+      - db_alunos
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db_alunos:3306/db_alunos
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    ports:
+      - "8081:8081"
+    networks:
+      - rede-biblioteca
+
+ 
+  livro-service:
+    build: ./services/livro-service
+    container_name: livro-service
+    depends_on:
+      - db_livros
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db_livros:3306/db_livros
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    ports:
+      - "8082:8082"
+    networks:
+      - rede-biblioteca
+
+  
+  emprestimo-service:
+    build: ./services/emprestimo-service
+    container_name: emprestimo-service
+    depends_on:
+      - db_emprestimos
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db_emprestimos:3306/db_emprestimos
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    ports:
+      - "8083:8083"
+    networks:
+      - rede-biblioteca
+
+  
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    depends_on:
+      - aluno-service
+      - livro-service
+      - emprestimo-service
+    ports:
+      - "5174:80"
+    networks:
+      - rede-biblioteca
+
+  
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - prometheus_data:/prometheus
+      - ./monitoramento/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - rede-biblioteca
+
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - rede-biblioteca
