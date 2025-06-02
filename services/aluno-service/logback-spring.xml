@@ -1,0 +1,23 @@
+<configuration>
+
+    <!-- Appender para enviar logs para o Elasticsearch via Logstash -->
+    <appender name="ES" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>localhost:5044</destination>  <!-- Endereço do Logstash -->
+    </appender>
+
+    <!-- Appender para o console (para visualização local) -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                {"@timestamp": "%date{ISO8601}", "level": "%level", "logger": "%logger", "message": "%message", "thread": "%thread"}
+            </pattern>
+        </encoder>
+    </appender>
+
+    <!-- Root logger para capturar todos os logs e enviá-los para os appenders configurados -->
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="ES"/>
+    </root>
+
+</configuration>
