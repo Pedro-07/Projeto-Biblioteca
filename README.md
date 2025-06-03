@@ -1,6 +1,7 @@
 # Projeto Biblioteca - Sistema de Gerenciamento Bibliotecário
 
-Este projeto é um sistema distribuído desenvolvido com arquitetura de microsserviços para o gerenciamento de uma biblioteca. Ele permite cadastrar alunos, livros, realizar empréstimos e enviar notificações por e-mail.
+Este projeto é um sistema distribuído desenvolvido com arquitetura de microsserviços para o gerenciamento de uma biblioteca. 
+Ele permite cadastrar alunos, livros, realizar empréstimos e enviar notificações por e-mail.
 
 ## Tecnologias Utilizadas
 
